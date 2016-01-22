@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2014 MediaTek Inc.
+# Modification based on code covered by the mentioned copyright
+# and/or permission notice(s).
+#
 # Copyright 2010 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +87,21 @@ endif
 ifneq ($(BOARD_NUMBER_OF_CAMERAS),)
     LOCAL_CFLAGS += -DMAX_CAMERAS=$(BOARD_NUMBER_OF_CAMERAS)
 endif
+#//!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Enable MTK stuff
+ifeq ($(BOARD_HAS_MTK_HARDWARE), true)
+    LOCAL_CFLAGS += -DMTK_HARDWARE
+    LOCAL_SHARED_LIBRARIES += libdl
+    LOCAL_SHARED_LIBRARIES += libcamera_client_mtk
 
+    LOCAL_C_INCLUDES += $(TOP)/frameworks/av/include
+    LOCAL_C_INCLUDES += $(TOP)/hardware/include
+
+
+    LOCAL_SRC_FILES += mediatek/CameraService.cpp
+    LOCAL_SRC_FILES += mediatek/api1/CameraClient.cpp
+endif
+#//!----------------------------------------------------------------------------
 LOCAL_MODULE:= libcameraservice
 
 include $(BUILD_SHARED_LIBRARY)

@@ -793,7 +793,13 @@ status_t Camera2Device::MetadataQueue::setStreamSlot(camera_metadata_t *buf)
         mStreamSlotCount = 0;
         return OK;
     }
-
+#ifdef MTK_HARDWARE
+    camera_metadata_t *buf2 = clone_camera_metadata(buf);
+    if (!buf2) {
+        ALOGE("%s: Unable to clone metadata buffer!", __FUNCTION__);
+        return NO_MEMORY;
+    }
+#endif
     if (mStreamSlotCount > 1) {
         List<camera_metadata_t*>::iterator deleter = ++mStreamSlot.begin();
         freeBuffers(++mStreamSlot.begin(), mStreamSlot.end());
@@ -801,9 +807,17 @@ status_t Camera2Device::MetadataQueue::setStreamSlot(camera_metadata_t *buf)
     }
     if (mStreamSlotCount == 1) {
         free_camera_metadata( *(mStreamSlot.begin()) );
+#ifdef MTK_HARDWARE
+        *(mStreamSlot.begin()) = buf2;
+#else
         *(mStreamSlot.begin()) = buf;
+#endif
     } else {
+#ifdef MTK_HARDWARE
+        mStreamSlot.push_front(buf2);
+#else
         mStreamSlot.push_front(buf);
+#endif
         mStreamSlotCount = 1;
     }
     return signalConsumerLocked();
@@ -822,7 +836,16 @@ status_t Camera2Device::MetadataQueue::setStreamSlot(
     mStreamSlotCount = 0;
     for (List<camera_metadata_t*>::const_iterator r = bufs.begin();
          r != bufs.end(); r++) {
+#ifdef MTK_HARDWARE
+        camera_metadata_t *r2 = clone_camera_metadata(*r);
+        if (!r2) {
+            ALOGE("%s: Unable to clone metadata buffer!", __FUNCTION__);
+            return NO_MEMORY;
+        }
+        mStreamSlot.push_back(r2);
+#else
         mStreamSlot.push_back(*r);
+#endif
         mStreamSlotCount++;
     }
     return signalConsumerLocked();

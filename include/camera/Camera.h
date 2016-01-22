@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,6 +73,10 @@ public:
         USE_CALLING_UID = ICameraService::USE_CALLING_UID
     };
 
+#ifdef MTK_HARDWARE
+    static  status_t    getProperty(String8 const& key, String8& value);
+    static  status_t    setProperty(String8 const& key, String8 const& value);
+#endif
             // construct a camera client from an existing remote
     static  sp<Camera>  create(const sp<ICamera>& camera);
     static  sp<Camera>  connect(int cameraId,
