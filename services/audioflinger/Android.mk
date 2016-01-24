@@ -96,6 +96,8 @@ endif
 LOCAL_MODULE:= libaudioflinger
 LOCAL_32_BIT_ONLY := true
 
+LOCAL_CFLAGS += -O2
+
 LOCAL_SRC_FILES += FastMixer.cpp FastMixerState.cpp AudioWatchdog.cpp
 LOCAL_SRC_FILES += FastThread.cpp FastThreadState.cpp
 LOCAL_SRC_FILES += FastCapture.cpp FastCaptureState.cpp
