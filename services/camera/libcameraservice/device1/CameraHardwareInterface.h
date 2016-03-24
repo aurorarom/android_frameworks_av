@@ -644,6 +644,10 @@ private:
                       buffer_handle_t* buffer)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return a->queueBuffer(a,
                   container_of(buffer, ANativeWindowBuffer, handle), -1);
     }
@@ -652,6 +656,10 @@ private:
                       buffer_handle_t* buffer)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return a->cancelBuffer(a,
                   container_of(buffer, ANativeWindowBuffer, handle), -1);
     }
@@ -659,6 +667,10 @@ private:
     static int __set_buffer_count(struct preview_stream_ops* w, int count)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return native_window_set_buffer_count(a, count);
     }
 
@@ -667,6 +679,10 @@ private:
     {
         int rc;
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
 
         rc = native_window_set_buffers_dimensions(a, width, height);
         if (!rc) {
@@ -679,6 +695,10 @@ private:
                       int left, int top, int right, int bottom)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         android_native_rect_t crop;
         crop.left = left;
         crop.top = top;
@@ -690,18 +710,30 @@ private:
     static int __set_timestamp(struct preview_stream_ops *w,
                                int64_t timestamp) {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return native_window_set_buffers_timestamp(a, timestamp);
     }
 
     static int __set_usage(struct preview_stream_ops* w, int usage)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return native_window_set_usage(a, usage);
     }
 
     static int __set_swap_interval(struct preview_stream_ops *w, int interval)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return a->setSwapInterval(a, interval);
     }
 
@@ -710,6 +742,10 @@ private:
                       int *count)
     {
         ANativeWindow *a = anw(w);
+        if (!a) {
+            ALOGE("%s: ANativeWindow is NULL!", __FUNCTION__);
+            return 0;
+        }
         return a->query(a, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, count);
     }
 
