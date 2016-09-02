@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,10 +42,14 @@
 
 #include <camera/ICameraServiceListener.h>
 
+#ifdef MTK_HARDWARE
+/* This needs to be increased if we can have more cameras */
+#define MAX_CAMERAS 2
+#else
 #ifndef MAX_CAMERAS
 #define MAX_CAMERAS 2
 #endif
-
+#endif
 namespace android {
 
 extern volatile int32_t gLogLevel;
@@ -65,6 +74,10 @@ public:
     // Implementation of BinderService<T>
     static char const* getServiceName() { return "media.camera"; }
 
+#ifdef MTK_HARDWARE
+    virtual status_t    getProperty(String8 const& key, String8& value) const;
+    virtual status_t    setProperty(String8 const& key, String8 const& value);
+#endif
                         CameraService();
     virtual             ~CameraService();
 

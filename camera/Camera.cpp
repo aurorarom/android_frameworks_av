@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
 **
 ** Copyright (C) 2008, The Android Open Source Project
 **
@@ -187,7 +192,11 @@ void Camera::stopRecording()
 // release a recording frame
 void Camera::releaseRecordingFrame(const sp<IMemory>& mem)
 {
+#ifdef MTK_HARDWARE
+    ALOGD("RRF");
+#else
     ALOGV("releaseRecordingFrame");
+#endif
     sp <ICamera> c = mCamera;
     if (c == 0) return;
     c->releaseRecordingFrame(mem);
@@ -338,7 +347,9 @@ void Camera::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<
         listener->postDataTimestamp(timestamp, msgType, dataPtr);
     } else {
         ALOGW("No listener was set. Drop a recording frame.");
+#ifndef MTK_HARDWARE
         releaseRecordingFrame(dataPtr);
+#endif
     }
 }
 
@@ -372,4 +383,24 @@ Camera::RecordingProxy::RecordingProxy(const sp<Camera>& camera)
     mCamera = camera;
 }
 
+#ifdef MTK_HARDWARE
+status_t
+Camera::
+getProperty(String8 const& key, String8& value)
+{
+    const sp<ICameraService>& cs = getCameraService();
+    if (cs == 0) return UNKNOWN_ERROR;
+    return cs->getProperty(key, value);
+}
+
+
+status_t
+Camera::
+setProperty(String8 const& key, String8 const& value)
+{
+    const sp<ICameraService>& cs = getCameraService();
+    if (cs == 0) return UNKNOWN_ERROR;
+    return cs->setProperty(key, value);
+}
+#endif
 }; // namespace android

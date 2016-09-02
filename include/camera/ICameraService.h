@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +58,12 @@ public:
         GET_LEGACY_PARAMETERS,
         SUPPORTS_CAMERA_API,
         CONNECT_LEGACY,
+//!++
+#ifdef MTK_HARDWARE
+        GET_PROPERTY, 
+        SET_PROPERTY, 
+#endif
+//!--
     };
 
     enum {
@@ -118,6 +129,13 @@ public:
             int clientUid,
             /*out*/
             sp<ICameraDeviceUser>& device) = 0;
+
+//!++
+#ifdef MTK_HARDWARE
+    virtual status_t getProperty(String8 const& key, String8& value) const = 0;
+    virtual status_t setProperty(String8 const& key, String8 const& value) = 0;
+#endif
+//!--
 
     virtual status_t getLegacyParameters(
             int cameraId,

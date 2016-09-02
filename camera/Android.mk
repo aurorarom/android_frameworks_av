@@ -53,6 +53,11 @@ LOCAL_C_INCLUDES += \
 	system/media/camera/include \
 	system/media/private/camera/include \
 
+# Enable MTK stuff
+ifeq ($(BOARD_HAS_MTK_HARDWARE), true)
+LOCAL_CFLAGS += -DMTK_HARDWARE
+endif
+
 ifneq ($(TARGET_SPECIFIC_CAMERA_PARAMETER_LIBRARY),)
 LOCAL_WHOLE_STATIC_LIBRARIES += $(TARGET_SPECIFIC_CAMERA_PARAMETER_LIBRARY)
 else

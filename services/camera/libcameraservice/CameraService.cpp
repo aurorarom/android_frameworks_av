@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,12 +55,19 @@
 #include "utils/CameraTraces.h"
 #include "CameraDeviceFactory.h"
 
+#ifdef MTK_HARDWARE
+    #include <camera/MtkCameraParameters.h>
+#endif
 namespace android {
 
 // ----------------------------------------------------------------------------
 // Logging support -- this is for debugging only
 // Use "adb shell dumpsys media.camera -v 1" to change it.
+#ifdef MTK_HARDWARE
+volatile int32_t gLogLevel = 1;
+#else
 volatile int32_t gLogLevel = 0;
+#endif
 
 #define LOG1(...) ALOGD_IF(gLogLevel >= 1, __VA_ARGS__);
 #define LOG2(...) ALOGD_IF(gLogLevel >= 2, __VA_ARGS__);
@@ -126,7 +138,12 @@ void CameraService::onFirstRef()
                     mNumberOfCameras, MAX_CAMERAS);
             mNumberOfCameras = MAX_CAMERAS;
         }
+#ifdef MTK_HARDWARE
+        for (int i = 0; i < MAX_CAMERAS; i++) { // workaround for MATV
+            LOG1("setCameraFree(%d)", i);
+#else
         for (int i = 0; i < mNumberOfCameras; i++) {
+#endif
             setCameraFree(i);
         }
 
@@ -221,6 +238,9 @@ void CameraService::onDeviceStatusChanged(int cameraId,
 }
 
 int32_t CameraService::getNumberOfCameras() {
+#ifdef MTK_HARDWARE
+    LOG1("[getNumberOfCameras] NumberOfCameras:%d \n", mNumberOfCameras);
+#endif
     return mNumberOfCameras;
 }
 
@@ -230,6 +250,9 @@ status_t CameraService::getCameraInfo(int cameraId,
         return -ENODEV;
     }
 
+#ifdef MTK_HARDWARE
+    LOG1("[getCameraInfo] id:%d NumberOfCameras:%d \n", cameraId, mNumberOfCameras);
+#endif
     if (cameraId < 0 || cameraId >= mNumberOfCameras) {
         return BAD_VALUE;
     }
@@ -586,9 +609,27 @@ status_t CameraService::validateConnect(int cameraId,
     }
 
     if (cameraId < 0 || cameraId >= mNumberOfCameras) {
+#ifdef MTK_HARDWARE
+        String8 s8ClientAppMode;
+        status_t status = getProperty(
+            String8(MtkCameraParameters::PROPERTY_KEY_CLIENT_APPMODE), 
+            s8ClientAppMode
+        );
+        if  ( String8(MtkCameraParameters::APP_MODE_NAME_MTK_ATV) == s8ClientAppMode )
+        {
+        ALOGD("CameraService::connect - mATV (pid %d), (cameraId %d) (mNumberOfCameras %d).",
+            callingPid, cameraId, mNumberOfCameras);
+        }
+        else
+#endif
+        {
+//!--
         ALOGE("CameraService::connect X (pid %d) rejected (invalid cameraId %d).",
             callingPid, cameraId);
         return -ENODEV;
+//!++
+        }
+//!--
     }
 
     char value[PROPERTY_VALUE_MAX];
@@ -1234,11 +1275,25 @@ sp<CameraService::BasicClient> CameraService::findClientUnsafe(
 }
 
 CameraService::BasicClient* CameraService::getClientByIdUnsafe(int cameraId) {
+#ifdef MTK_HARDWARE
+    if (0 == mNumberOfCameras && 0 == cameraId)
+    {
+        ALOGW("[CameraService::getClientByIdUnsafe] mNumberOfCameras==0 && cameraId==0, might be mATV \n");
+        return mClient[cameraId].unsafe_get();
+    }
+#endif
     if (cameraId < 0 || cameraId >= mNumberOfCameras) return NULL;
     return mClient[cameraId].unsafe_get();
 }
 
 Mutex* CameraService::getClientLockById(int cameraId) {
+#ifdef MTK_HARDWARE
+    if (0 == mNumberOfCameras && 0 == cameraId)
+    {
+        ALOGW("[CameraService::getClientLockById] mNumberOfCameras==0 && cameraId==0, might be mATV \n");
+        return &mClientLock[cameraId];
+    }
+#endif
     if (cameraId < 0 || cameraId >= mNumberOfCameras) return NULL;
     return &mClientLock[cameraId];
 }
@@ -1307,6 +1362,9 @@ void CameraService::setCameraFree(int cameraId) {
 // media players.
 
 MediaPlayer* CameraService::newMediaPlayer(const char *file) {
+#ifdef MTK_HARDWARE
+    LOG1("[CameraService::newMediaPlayer] + (%s)\r\n", file);
+#endif
     MediaPlayer* mp = new MediaPlayer();
     if (mp->setDataSource(NULL /* httpService */, file, NULL) == NO_ERROR) {
         mp->setAudioStreamType(AUDIO_STREAM_ENFORCED_AUDIBLE);
@@ -1315,10 +1373,16 @@ MediaPlayer* CameraService::newMediaPlayer(const char *file) {
         ALOGE("Failed to load CameraService sounds: %s", file);
         return NULL;
     }
+#ifdef MTK_HARDWARE
+    LOG1("[CameraService::newMediaPlayer] -\r\n");
+#endif
     return mp;
 }
 
 void CameraService::loadSound() {
+#ifdef MTK_HARDWARE
+    LOG1("[CameraService::loadSound] + tid:%d mSoundLock - ref=%d\r\n", ::gettid(), mSoundRef);
+#endif
     Mutex::Autolock lock(mSoundLock);
     LOG1("CameraService::loadSound ref=%d", mSoundRef);
     if (mSoundRef++) return;
@@ -1348,6 +1412,9 @@ void CameraService::playSound(sound_kind kind) {
         player->seekTo(0);
         player->start();
     }
+#ifdef MTK_HARDWARE
+    LOG1("playSound(%d) - tid:%d", kind, ::gettid());
+#endif
 }
 
 // ----------------------------------------------------------------------------

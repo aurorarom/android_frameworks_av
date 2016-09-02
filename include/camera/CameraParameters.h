@@ -100,6 +100,11 @@ public:
     void setPictureFormat(const char *format);
     const char *getPictureFormat() const;
 
+#ifdef MTK_HARDWARE
+    void setCameraPictureFlip(const int format);
+    const int getCameraPictureFlip() const;
+#endif
+
     void dump() const;
     status_t dump(int fd, const Vector<String16>& args) const;
 
@@ -159,6 +164,9 @@ public:
     // Example value: "jpeg" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PICTURE_FORMAT[];
     // Supported image formats for captured pictures.
+#ifdef MTK_HARDWARE
+    static const char SNAPSHOT_PICTURE_FLIP[];//add by xueweifeng
+#endif
     // Example value: "jpeg,rgb565". Read only.
     static const char KEY_SUPPORTED_PICTURE_FORMATS[];
     // The width (in pixels) of EXIF thumbnail in Jpeg picture.

@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -127,6 +132,14 @@ public:
         ALOGV("%s(%s) buf %p", __FUNCTION__, mName.string(), buf.get());
 
         if (mDevice->ops->set_preview_window) {
+#ifdef MTK_HARDWARE
+            if  ( buf == 0 ) {
+                ALOGD("set_preview_window(0) before mPreviewWindow = 0 \r\n");
+                mDevice->ops->set_preview_window(mDevice, 0);
+                mPreviewWindow = 0;
+                return  OK;
+            }
+#endif
             mPreviewWindow = buf;
             mHalPreviewWindow.user = this;
             ALOGV("%s &mHalPreviewWindow %p mHalPreviewWindow.user %p", __FUNCTION__,
