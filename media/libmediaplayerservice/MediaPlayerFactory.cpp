@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
 **
 ** Copyright 2012, The Android Open Source Project
 **
@@ -33,6 +38,7 @@
 #include "TestPlayerStub.h"
 #include "StagefrightPlayer.h"
 #include "nuplayer/NuPlayerDriver.h"
+#include "FMAudioPlayer.h"
 #include <dlfcn.h>
 
 namespace android {
@@ -387,6 +393,21 @@ class TestPlayerFactory : public MediaPlayerFactory::IFactory {
         return new TestPlayerStub();
     }
 };
+class FMPlayerFactory : public MediaPlayerFactory::IFactory {
+  public:
+    virtual float scoreFactory(const sp<IMediaPlayer>& client,
+                               const char* url,
+                               float curScore) {
+        if(strncmp(url, "THIRDPARTY://MEDIAPLAYER_PLAYERTYPE_FM", 38) == 0)
+           return 1.0;
+        return 0.0;
+    }
+
+    virtual sp<MediaPlayerBase> createPlayer() {
+        return new FMAudioPlayer();
+        return NULL;
+    }
+};
 
 void MediaPlayerFactory::registerBuiltinFactories() {
     Mutex::Autolock lock_(&sLock);
@@ -398,6 +419,7 @@ void MediaPlayerFactory::registerBuiltinFactories() {
     registerFactory_l(new NuPlayerFactory(), NU_PLAYER);
     registerFactory_l(new SonivoxPlayerFactory(), SONIVOX_PLAYER);
     registerFactory_l(new TestPlayerFactory(), TEST_PLAYER);
+    registerFactory_l(new FMPlayerFactory(), FM_AUDIO_PLAYER);
 
     const char* FACTORY_LIB           = "libdashplayer.so";
     const char* FACTORY_CREATE_FN     = "CreateDASHFactory";

@@ -54,6 +54,7 @@ enum player_type {
     // argument to the 'test:' url in the setDataSource call.
     TEST_PLAYER = 5,
     DASH_PLAYER = 6,
+    FM_AUDIO_PLAYER=7,
 };
 
 

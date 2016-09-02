@@ -43,6 +43,7 @@ LOCAL_SHARED_LIBRARIES :=       \
     libutils                    \
     libvorbisidec               \
     libdrmframework             \
+    libmtkplayer
 
 LOCAL_STATIC_LIBRARIES :=       \
     libstagefright_nuplayer     \
@@ -55,6 +56,7 @@ LOCAL_C_INCLUDES :=                                                 \
     $(TOP)/frameworks/av/media/libstagefright/webm                  \
     $(TOP)/frameworks/native/include/media/openmax                  \
     $(TOP)/external/tremolo/Tremolo                                 \
+    $(TOP)/device/xiaomi/hermes/MediaTek/fmaudioplayer
 
 LOCAL_MODULE:= libmediaplayerservice
 

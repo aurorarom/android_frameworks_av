@@ -1,4 +1,9 @@
 /*
+* Copyright (C) 2014 MediaTek Inc.
+* Modification based on code covered by the mentioned copyright
+* and/or permission notice(s).
+*/
+/*
 ** Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
 ** Not a Contribution.
 ** Copyright 2007, The Android Open Source Project
@@ -1151,6 +1156,19 @@ status_t AudioFlinger::setStreamVolume(audio_stream_type_t stream, float value,
         thread->setStreamVolume(stream, value);
     }
 
+    // change by hochi for fm volume
+    if(stream == AUDIO_STREAM_MUSIC)
+    {
+        sp<ThreadBase> thread;
+        thread = checkPlaybackThread_l(output);
+        if (thread == primaryPlaybackThread_l())
+        {
+            //MTK_ALOG_D("setStreamVolume FM  value = %f",value);
+            audio_hw_device_t *dev = mPrimaryHardwareDev->hwDevice();
+            dev->set_parameters (dev,String8::format("SetFmVolume=%f",value));
+        }
+    }
+
     return NO_ERROR;
 }
 
@@ -1164,6 +1182,12 @@ status_t AudioFlinger::setStreamMute(audio_stream_type_t stream, bool muted)
     status_t status = checkStreamType(stream);
     if (status != NO_ERROR) {
         return status;
+    }
+    if(stream == AUDIO_STREAM_MUSIC)
+    {
+        //MTK_ALOG_D("setStreamMute MATV muted=%d",muted);
+        audio_hw_device_t *dev = mPrimaryHardwareDev->hwDevice();
+        dev->set_parameters (dev,String8::format("SetMatvMute=%d",muted));
     }
     ALOG_ASSERT(stream != AUDIO_STREAM_PATCH, "attempt to mute AUDIO_STREAM_PATCH");
 
